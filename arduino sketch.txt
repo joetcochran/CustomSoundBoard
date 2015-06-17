@@ -1,0 +1,367 @@
+int TrackCommandModeSequence = 0;
+int VolumeCommandModeSequence = 0;
+
+int led = 13;
+boolean TrackCommandModeReady = false;
+boolean VolumeCommandModeReady = false;
+int TrackMode = 1;
+
+const byte TRACK1 = 0x01;
+int TRACK1_BUTTON = 22;
+int TRACK1_LED = 31;
+boolean TRACK1_PUSHED = false;
+boolean TRACK1_PUSHED_NEW = false;
+
+const byte TRACK2 = 0x02;
+int TRACK2_BUTTON = 23;
+int TRACK2_LED = 32;
+boolean TRACK2_PUSHED = false;
+boolean TRACK2_PUSHED_NEW = false;
+
+const byte TRACK3 = 0x03;
+int TRACK3_BUTTON = 24;
+int TRACK3_LED_PWM_RED = 3;
+int TRACK3_LED_PWM_GREEN = 4;
+int TRACK3_LED_PWM_BLUE = 5;
+boolean TRACK3_PUSHED = false;
+boolean TRACK3_PUSHED_NEW = false;
+
+const byte TRACK4 = 0x04;
+int TRACK4_BUTTON = 25;
+int TRACK4_LED = 33;
+boolean TRACK4_PUSHED = false;
+boolean TRACK4_PUSHED_NEW = false;
+
+const byte TRACK5 = 0x05;
+int TRACK5_BUTTON = 26;
+int TRACK5_LED = 34;
+boolean TRACK5_PUSHED = false;
+boolean TRACK5_PUSHED_NEW = false;
+
+const byte TRACK6 = 0x06;
+int TRACK6_BUTTON = 27;
+int TRACK6_LED_PWM_RED = 6;
+int TRACK6_LED_PWM_GREEN = 7;
+int TRACK6_LED_PWM_BLUE = 8;
+boolean TRACK6_PUSHED = false;
+boolean TRACK6_PUSHED_NEW = false;
+
+const byte TRACK7 = 0x07;
+int TRACK7_BUTTON = 28;
+int TRACK7_LED_PWM_RED = 9;
+int TRACK7_LED_PWM_GREEN = 10;
+int TRACK7_LED_PWM_BLUE = 11;
+boolean TRACK7_PUSHED = false;
+boolean TRACK7_PUSHED_NEW = false;
+
+const byte TRACK8 = 0x08;
+int TRACK8_BUTTON = 29;
+int TRACK8_LED = 35;
+boolean TRACK8_PUSHED = false;
+boolean TRACK8_PUSHED_NEW = false;
+
+const byte TRACK9 = 0x09;
+int TRACK9_BUTTON = 30;
+int TRACK9_LED = 36;
+boolean TRACK9_PUSHED = false;
+boolean TRACK9_PUSHED_NEW = false;
+
+byte Volume = 0x40;
+void setup() {
+  pinMode(led, OUTPUT);     
+  FlashAllLEDs(3);
+
+  Serial.begin(38400);
+  Serial.write('v');
+  Serial.write(Volume);
+
+  pinMode(TRACK1_BUTTON, INPUT);     
+  pinMode(TRACK2_BUTTON, INPUT);     
+  pinMode(TRACK3_BUTTON, INPUT);     
+  pinMode(TRACK4_BUTTON, INPUT);     
+  pinMode(TRACK5_BUTTON, INPUT);     
+  pinMode(TRACK6_BUTTON, INPUT);     
+  pinMode(TRACK7_BUTTON, INPUT);     
+  pinMode(TRACK8_BUTTON, INPUT);     
+  pinMode(TRACK9_BUTTON, INPUT);   
+
+
+  pinMode(TRACK1_LED, OUTPUT);     
+  pinMode(TRACK2_LED, OUTPUT);     
+  pinMode(TRACK3_LED_PWM_RED, OUTPUT);     
+  pinMode(TRACK3_LED_PWM_GREEN, OUTPUT);     
+  pinMode(TRACK3_LED_PWM_BLUE, OUTPUT);     
+  pinMode(TRACK4_LED, OUTPUT);     
+  pinMode(TRACK5_LED, OUTPUT);     
+  pinMode(TRACK6_LED_PWM_RED, OUTPUT);     
+  pinMode(TRACK6_LED_PWM_GREEN, OUTPUT);     
+  pinMode(TRACK6_LED_PWM_BLUE, OUTPUT);     
+  pinMode(TRACK7_LED_PWM_RED, OUTPUT);     
+  pinMode(TRACK7_LED_PWM_GREEN, OUTPUT);     
+  pinMode(TRACK7_LED_PWM_BLUE, OUTPUT);     
+  pinMode(TRACK8_LED, OUTPUT);     
+  pinMode(TRACK9_LED, OUTPUT);     
+ 
+
+  digitalWrite(TRACK1_BUTTON, HIGH);
+  digitalWrite(TRACK2_BUTTON, HIGH);
+  digitalWrite(TRACK3_BUTTON, HIGH);
+  digitalWrite(TRACK4_BUTTON, HIGH);
+  digitalWrite(TRACK5_BUTTON, HIGH);
+  digitalWrite(TRACK6_BUTTON, HIGH);
+  digitalWrite(TRACK7_BUTTON, HIGH);
+  digitalWrite(TRACK8_BUTTON, HIGH);
+  digitalWrite(TRACK9_BUTTON, HIGH);
+
+   TurnOffAllLEDs();
+}
+
+  
+boolean ButtonPushed(int Button)
+{
+  return (digitalRead(Button) == LOW);
+}
+
+void PlayTrack(byte Boss)
+{
+   Serial.write('p');
+   int Track = (int)Boss;
+   byte AbsoluteTrack = (byte)(Track + ((TrackMode - 1)  * 9));
+   Serial.write(AbsoluteTrack);
+   TurnOffAllLEDs();   
+   SetLEDs(Boss);     
+}
+void TurnOffAllLEDs()
+{
+      digitalWrite(TRACK1_LED, LOW);
+      digitalWrite(TRACK2_LED, LOW);
+      setColor(TRACK3_LED_PWM_RED, TRACK3_LED_PWM_GREEN, TRACK3_LED_PWM_BLUE, 0, 0, 0);
+      digitalWrite(TRACK4_LED, LOW);
+      digitalWrite(TRACK5_LED, LOW);
+      setColor(TRACK6_LED_PWM_RED, TRACK6_LED_PWM_GREEN, TRACK6_LED_PWM_BLUE, 0, 0, 0);
+      setColor(TRACK7_LED_PWM_RED, TRACK7_LED_PWM_GREEN, TRACK7_LED_PWM_BLUE, 0, 0, 0);
+      digitalWrite(TRACK8_LED, LOW);
+      digitalWrite(TRACK9_LED, LOW);
+}
+
+void SetLEDs(byte Boss)
+{
+  switch (Boss)
+  {
+    case TRACK1:
+      digitalWrite(TRACK1_LED, HIGH);
+      break;
+    case TRACK2:
+      digitalWrite(TRACK2_LED, HIGH);
+      break;
+    case TRACK3:
+      setColor(TRACK3_LED_PWM_RED, TRACK3_LED_PWM_GREEN, TRACK3_LED_PWM_BLUE, 150, 0, 150);
+      break;
+    case TRACK4:
+      digitalWrite(TRACK4_LED, HIGH);
+      break;
+    case TRACK5:
+      digitalWrite(TRACK5_LED, HIGH);
+      break;
+    case TRACK6:
+      setColor(TRACK6_LED_PWM_RED, TRACK6_LED_PWM_GREEN, TRACK6_LED_PWM_BLUE, 5, 255, 5);
+      break;
+    case TRACK7:
+      setColor(TRACK7_LED_PWM_RED, TRACK7_LED_PWM_GREEN, TRACK7_LED_PWM_BLUE, 250, 0, 5);
+      break;
+    case TRACK8:
+      digitalWrite(TRACK8_LED, HIGH);
+      break;
+    case TRACK9:
+      digitalWrite(TRACK9_LED, HIGH);
+      break;      
+  }
+ 
+
+}
+
+void setColor(int redPin, int greenPin, int bluePin, int redValue, int greenValue, int blueValue)
+{
+  analogWrite(redPin, 255-redValue);
+  analogWrite(greenPin, 255-greenValue);
+  analogWrite(bluePin, 255-blueValue);  
+}
+
+
+void SetVolumeUp()
+{
+  if (Volume != 0x00)
+  {
+    Volume = Volume - 0x08;
+    Serial.write('v');
+    Serial.write(Volume);  
+  }
+}
+
+void SetVolumeDown()
+{
+  if (Volume != 0xFF)
+  {
+    Volume = Volume + 0x08;
+    Serial.write('v');
+    Serial.write(Volume);  
+  }
+}
+
+boolean CheckCommandMode(int button)
+{
+  if ((!TrackCommandModeReady) && (!VolumeCommandModeReady))
+  {
+    //5=5=5
+    if ((button == 1) && (TrackCommandModeSequence == 0))
+        TrackCommandModeSequence++;
+    else if ((button == 5) && (TrackCommandModeSequence == 1))
+        TrackCommandModeSequence++;
+    else if ((button == 9) && (TrackCommandModeSequence == 2))
+        TrackCommandModeSequence++;
+    else if ((button == 3) && (VolumeCommandModeSequence == 0))
+        VolumeCommandModeSequence++;
+    else if ((button == 5) && (VolumeCommandModeSequence == 1))
+        VolumeCommandModeSequence++;
+    else if ((button == 7) && (VolumeCommandModeSequence == 2))
+        VolumeCommandModeSequence++;
+    else
+    {
+      TrackCommandModeSequence = 0;
+      VolumeCommandModeSequence = 0;
+    }   
+      
+    if (TrackCommandModeSequence == 3)
+    {
+      TrackCommandModeReady = true;
+      TrackCommandModeSequence = 0;
+      Serial.write('O');
+      FlashAllLEDs(3);
+      return true;
+    }
+    else if (VolumeCommandModeSequence == 3)
+    {
+      VolumeCommandModeReady = true;
+      VolumeCommandModeSequence = 0;
+      Serial.write('O');
+      FlashAllLEDs(2);
+      return true;     
+    } 
+    else
+    {
+      return false;
+    } 
+  }
+  else if (TrackCommandModeReady)
+  {
+    if (button == 1)
+      TrackMode = 0x01;
+    if (button == 2)
+      TrackMode = 0x02;
+    if (button == 3)
+      TrackMode = 0x03;
+    if (button == 4)
+      TrackMode = 0x04;
+    if (button == 5)
+      TrackMode = 0x05;
+
+    FlashAllLEDs(1);  
+    TrackCommandModeReady = false; 
+    return true;
+  }
+  else if (VolumeCommandModeReady)
+  {
+    if (button == 2)
+      SetVolumeUp();
+    if (button == 8)
+      SetVolumeDown();  
+    FlashAllLEDs(1);
+    VolumeCommandModeReady = false;  
+    return true;
+  }
+}
+
+void TurnOnAllLEDs()
+{
+  SetLEDs(0x01);
+  SetLEDs(0x02);
+  SetLEDs(0x03);
+  SetLEDs(0x04);
+  SetLEDs(0x05);
+  SetLEDs(0x06);
+  SetLEDs(0x07);
+  SetLEDs(0x08);
+  SetLEDs(0x09);
+}
+
+void FlashAllLEDs(int count)
+{
+  do
+  {
+    TurnOnAllLEDs();
+    delay(300);
+    TurnOffAllLEDs();
+    delay(300);
+    count--;
+  } while (count !=0);
+}
+
+void FlashDebugLED(int count)
+{
+  while (count != 0)
+  {
+    digitalWrite(led,HIGH);
+    delay(300);
+    digitalWrite(led,LOW);
+    delay(300);
+    count--;
+  }
+  delay(1000);
+}
+
+void loop() {
+ 
+    if (Serial.available() > 0) {
+      // get incoming byte:
+      byte inByte = Serial.read();
+      if (inByte == 'X')
+      {
+        TurnOffAllLEDs();
+      }
+    }
+ 
+  TRACK1_PUSHED_NEW = ButtonPushed(TRACK1_BUTTON);
+  TRACK2_PUSHED_NEW = ButtonPushed(TRACK2_BUTTON);
+  TRACK3_PUSHED_NEW = ButtonPushed(TRACK3_BUTTON);
+  TRACK4_PUSHED_NEW = ButtonPushed(TRACK4_BUTTON);
+  TRACK5_PUSHED_NEW = ButtonPushed(TRACK5_BUTTON);
+  TRACK6_PUSHED_NEW = ButtonPushed(TRACK6_BUTTON);
+  TRACK7_PUSHED_NEW = ButtonPushed(TRACK7_BUTTON);
+  TRACK8_PUSHED_NEW = ButtonPushed(TRACK8_BUTTON);
+  TRACK9_PUSHED_NEW = ButtonPushed(TRACK9_BUTTON);
+  
+  
+      
+  //check to see if any buttons just got unpressed.
+  if ((TRACK1_PUSHED) && (!TRACK1_PUSHED_NEW))  {if (!CheckCommandMode(1)) {PlayTrack(TRACK1);}}
+  if ((TRACK2_PUSHED) && (!TRACK2_PUSHED_NEW))        {if (!CheckCommandMode(2)) {PlayTrack(TRACK2);}}
+  if ((TRACK3_PUSHED) && (!TRACK3_PUSHED_NEW))    {if (!CheckCommandMode(3)) {PlayTrack(TRACK3);}}
+  if ((TRACK4_PUSHED) && (!TRACK4_PUSHED_NEW))      {if (!CheckCommandMode(4)) {PlayTrack(TRACK4);}}
+  if ((TRACK5_PUSHED) && (!TRACK5_PUSHED_NEW))      {if (!CheckCommandMode(5)) {PlayTrack(TRACK5);}}
+  if ((TRACK6_PUSHED) && (!TRACK6_PUSHED_NEW))      {if (!CheckCommandMode(6)) {PlayTrack(TRACK6);}}
+  if ((TRACK7_PUSHED) && (!TRACK7_PUSHED_NEW))    {if (!CheckCommandMode(7)) {PlayTrack(TRACK7);}}
+  if ((TRACK8_PUSHED) && (!TRACK8_PUSHED_NEW))    {if (!CheckCommandMode(8)) {PlayTrack(TRACK8);}}
+  if ((TRACK9_PUSHED) && (!TRACK9_PUSHED_NEW))    {if (!CheckCommandMode(9)) {PlayTrack(TRACK9);}}
+    
+  //persist each button state for the next iteration
+  TRACK1_PUSHED = TRACK1_PUSHED_NEW;
+  TRACK2_PUSHED = TRACK2_PUSHED_NEW;
+  TRACK3_PUSHED = TRACK3_PUSHED_NEW;
+  TRACK4_PUSHED = TRACK4_PUSHED_NEW;
+  TRACK5_PUSHED = TRACK5_PUSHED_NEW;
+  TRACK6_PUSHED = TRACK6_PUSHED_NEW;
+  TRACK7_PUSHED = TRACK7_PUSHED_NEW;
+  TRACK8_PUSHED = TRACK8_PUSHED_NEW;
+  TRACK9_PUSHED = TRACK9_PUSHED_NEW;
+  
+}
